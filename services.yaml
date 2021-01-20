@@ -1,0 +1,39 @@
+services:
+  _defaults:
+    autowire: true
+
+  Common\Service\Sitemap\Application\:
+    resource: './Application/*'
+
+  Common\Service\Sitemap\Infrastructure\:
+    resource: './Infrastructure/*'
+    exclude: './Infrastructure/{Service/Collection/BatchCollection.php}'
+
+  sitemap.xml.renderer:
+    class: 'Phalcon\Mvc\ViewBaseInterface'
+    factory: ['@Common\Service\Sitemap\Infrastructure\Service\XmlRenderer\Factory\XmlRendererFactory', 'getInstance']
+
+  Common\Service\Sitemap\SitemapGeneratorInterface:
+    class: Common\Service\Sitemap\SitemapGenerator
+    arguments:
+      $db: '@Common\Service\Db\DbInterface'
+      $logger: '@Psr\Log\LoggerInterface'
+      $view: '@sitemap.xml.renderer'
+      $searchEngineService: '@Common\Interfaces\SearchEngineIndexingManagerInterface'
+      $urlHandler: '@Common\Service\Sitemap\Application\Service\UrlHandler\UrlHandlerInterface'
+
+  Common\Service\Sitemap\Application\Service\UrlGenerator\VendorsUrlGenerator:
+    class: Common\Service\Sitemap\Application\Service\UrlGenerator\VendorsUrlGenerator
+
+  Common\Service\Sitemap\Application\Service\UrlGenerator\SparePartsUrlGenerator:
+    class: Common\Service\Sitemap\Application\Service\UrlGenerator\SparePartsUrlGenerator
+
+  Common\Service\Sitemap\Application\Service\UrlGenerator\ReviewsUrlGenerator:
+    class: Common\Service\Sitemap\Application\Service\UrlGenerator\ReviewsUrlGenerator
+
+  Common\Service\Sitemap\Application\Service\UrlHandler\UrlHandlerInterface:
+    class: Common\Service\Sitemap\Application\Service\UrlHandler\UrlHandler
+    arguments:
+      $sparePartsUrlGenerator: '@Common\Service\Sitemap\Application\Service\UrlGenerator\SparePartsUrlGenerator'
+      $reviewsUrlGenerator: '@Common\Service\Sitemap\Application\Service\UrlGenerator\ReviewsUrlGenerator'
+      $vendorsUrlGenerator: '@Common\Service\Sitemap\Application\Service\UrlGenerator\VendorsUrlGenerator'
